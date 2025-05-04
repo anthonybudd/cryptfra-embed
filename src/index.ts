@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    class CinfraEmbed {
+    class PosfraEmbed {
         private container: Element;
 
         constructor(container: Element) {
@@ -71,7 +71,7 @@
 
             // Set URL
             const base64 = btoa(JSON.stringify(data));
-            iframe.setAttribute('src', `http://127.0.0.1:3000/${base64}`);
+            iframe.setAttribute('src', `${API_URL}/${base64}`);
 
             // Insert iframe securely
             this.container.innerHTML = ''; // prevent XSS from inner HTML
@@ -80,8 +80,8 @@
     }
 
     function init() {
-        document.querySelectorAll('.cinfra').forEach((container) => {
-            new CinfraEmbed(container);
+        document.querySelectorAll('.posfra').forEach((container) => {
+            new PosfraEmbed(container);
         });
     };
 

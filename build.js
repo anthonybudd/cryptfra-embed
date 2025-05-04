@@ -1,5 +1,7 @@
 // build.js
 const esbuild = require('esbuild');
+const dotenv = require('dotenv');
+dotenv.config();
 
 esbuild.build({
     entryPoints: ['src/index.ts'],         // Your main TypeScript file
@@ -11,5 +13,8 @@ esbuild.build({
     globalName: 'CinfraEmbed',             // Expose your code as `window.CinfraEmbed`
     target: ['es2017'],                    // Set target environment (adjust as needed)
     platform: 'browser',                   // Optimize for browser usage
-    logLevel: 'info'                       // Log build info to console
+    logLevel: 'info',                     // Log build info to console
+    define: {
+        'API_URL': `'${process.env.API_URL}'`,
+    }
 }).catch(() => process.exit(1));
