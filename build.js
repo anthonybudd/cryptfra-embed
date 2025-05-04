@@ -6,7 +6,7 @@ esbuild.build({
     bundle: true,                          // Bundle dependencies
     minify: true,                          // Minify output for CDN use
     sourcemap: false,                       // Optional: useful for debugging
-    outfile: 'dist/bundle.js',             // Output file
+    outfile: 'dist/embed.js',              // Output file
     format: 'iife',                        // IIFE format so it can be used in <script>
     globalName: 'CinfraEmbed',             // Expose your code as `window.CinfraEmbed`
     target: ['es2017'],                    // Set target environment (adjust as needed)
