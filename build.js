@@ -10,7 +10,7 @@ esbuild.build({
     sourcemap: false,                       // Optional: useful for debugging
     outfile: 'dist/embed.js',              // Output file
     format: 'iife',                        // IIFE format so it can be used in <script>
-    globalName: 'PosfraEmbed',             // Expose your code as `window.CinfraEmbed`
+    globalName: 'PosfraEmbed',             // Expose your code as `window.PosfraEmbed`
     target: ['es2017'],                    // Set target environment (adjust as needed)
     platform: 'browser',                   // Optimize for browser usage
     logLevel: 'info',                     // Log build info to console
