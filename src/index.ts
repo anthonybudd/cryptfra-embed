@@ -15,24 +15,51 @@
             iframe.setAttribute('height', '600');
             iframe.setAttribute('frameborder', '0');
             iframe.setAttribute('loading', 'lazy');
-
             iframe.style.width = '300px';
             iframe.style.height = '500px';
 
+            // Add event listener to warn before refreshing or changing page
+            const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+                // Standard message (browsers may show their own message instead)
+                const message = 'Are you sure you want to leave? Your payment process may be interrupted.';
+                event.preventDefault();
+                event.returnValue = message;
+                return message;
+            };
+
+            // Add the event listener when the iframe loads
+            iframe.addEventListener('load', () => {
+                window.addEventListener('beforeunload', beforeUnloadHandler);
+            });
+
+            // Create a method to remove the warning when payment is complete
+            // This can be called via postMessage from the iframe when payment succeeds
+            window.removePaymentWarning = () => {
+                window.removeEventListener('beforeunload', beforeUnloadHandler);
+            };
+
+            // Get embed token
+            const embedToken = this.container.getAttribute('data-embed-token');
+            if (!embedToken) throw new Error('Missing embed token');
+
+            // AB: type this
+            const data: any = {
+                et: embedToken,
+            };
+
             // Options
             const options = [
-                'embed-token',
-                'amount',
-                'currency',
+                'btc',
+                'eth',
+                'xmr',
+                'doge',
             ];
-            const data: any = {}; // AB: type this
             for (const option of options) {
                 const value = this.container.getAttribute(`data-${option}`);
-                if (!value) throw new Error(`Missing option: ${option}`); // AB: Go to Error URL
-                data[option.charAt(0).toLowerCase()] = value;
+                if (value) data[option.toLowerCase()] = value;
             }
 
-            // Strict sandbox - customize only if needed
+            // Strict sandbox
             iframe.setAttribute(
                 'sandbox',
                 'allow-scripts allow-same-origin' // No allow-forms, no allow-popups, no allow-top-navigation
