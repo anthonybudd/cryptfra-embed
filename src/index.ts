@@ -17,6 +17,8 @@
             iframe.setAttribute('loading', 'lazy');
             iframe.style.width = '300px';
             iframe.style.height = '500px';
+            iframe.style.margin = 'auto';
+            iframe.style.display = 'block';
 
             // Add event listener to warn before refreshing or changing page
             const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
@@ -65,15 +67,12 @@
                 'allow-scripts allow-same-origin' // No allow-forms, no allow-popups, no allow-top-navigation
             );
 
-            // Add security style isolation
             iframe.style.border = '0';
             iframe.style.display = 'block';
 
             // Set URL
             const base64 = btoa(JSON.stringify(data));
             iframe.setAttribute('src', `${API_URL}/${base64}`);
-
-            // Insert iframe securely
             this.container.innerHTML = ''; // prevent XSS from inner HTML
             this.container.appendChild(iframe);
         }
