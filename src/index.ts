@@ -19,6 +19,8 @@
             iframe.style.height = '500px';
             iframe.style.margin = 'auto';
             iframe.style.display = 'block';
+            iframe.style.borderRadius = '15px';
+
 
             // Add event listener to warn before refreshing or changing page
             const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
