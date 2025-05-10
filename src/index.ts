@@ -31,7 +31,7 @@
 
             // Add the event listener when the iframe loads
             iframe.addEventListener('load', () => {
-                window.addEventListener('beforeunload', beforeUnloadHandler);
+                // window.addEventListener('beforeunload', beforeUnloadHandler);
             });
 
             // Create a method to remove the warning when payment is complete
