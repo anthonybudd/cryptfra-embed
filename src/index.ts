@@ -5,6 +5,7 @@
         private container: Element;
         private embedToken: string | null = null;
         private ref: string | null = null;
+        private noWarning: boolean = false;
         private redirectURL: string | null = null;
 
         constructor(container: Element) {
@@ -38,7 +39,10 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (data.isPaid === true) {
-                        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+
+                        if (!this.noWarning) {
+                            window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+                        }
 
                         if (this.redirectURL) {
                             window.location.href = this.redirectURL;
@@ -75,7 +79,6 @@
             iframe.style.borderRadius = '15px';
             iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); // Strict sandbox - No allow-forms, no allow-popups, no allow-top-navigation
 
-            iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
 
             // Get embed token
             const embedToken = this.container.getAttribute('data-embed-token');
@@ -84,11 +87,19 @@
             this.ref = this.shortUUID();
             console.log(`Posfra transaction ref: ${this.ref}`);
 
-            // Validate URL
+            // Redirect URL
             const redirectURL = this.container.getAttribute('data-redirect-url');
             if (redirectURL && this.validateUrl(redirectURL)) {
                 this.redirectURL = redirectURL;
             }
+
+            // No Warning
+            this.noWarning = this.container.getAttribute('data-no-warning') === 'true';
+            if (!this.noWarning) {
+                iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
+            }
+
+
 
             // AB: type this
             const data: any = {
