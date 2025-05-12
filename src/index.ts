@@ -3,10 +3,62 @@
 
     class PosfraEmbed {
         private container: Element;
+        private embedToken: string | null = null;
+        private ref: string | null = null;
+        private redirectURL: string | null = null;
 
         constructor(container: Element) {
             this.container = container;
             this.build();
+        }
+
+        private shortUUID(): string {
+            return 'xxxxxxxx'.replace(/[xy]/g, (char) => {
+                const rand = Math.random() * 16 | 0;
+                const value = char === 'x' ? rand : (rand & 0x3 | 0x8);
+                return value.toString(16);
+            });
+        }
+
+        private getStatus(ref: string): Promise<Response> {
+            return fetch(`${API_URL}/ref/${ref}`);
+        }
+
+        private beforeUnloadHandler(event: BeforeUnloadEvent) {
+            const message = 'Are you sure you want to leave? Your payment process may be interrupted.';
+            event.preventDefault();
+            event.returnValue = message;
+            return message;
+        };
+
+        private async update(): Promise<void> {
+            try {
+                if (!this.ref) return;
+                const response = await this.getStatus(this.ref);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.isPaid === true) {
+                        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+
+                        if (this.redirectURL) {
+                            window.location.href = this.redirectURL;
+                        }
+                    }
+                }
+            } catch (_) { }
+        }
+
+        private validateUrl(url: string): boolean {
+            try {
+                new URL(url);
+                return true;
+            } catch (error) {
+                if (url !== '') {
+                    console.error(`ERROR 73380: Invalid URL: ${url}`);
+                    console.error(error);
+                }
+                return false;
+            }
         }
 
         public build() {
@@ -19,36 +71,29 @@
             iframe.style.height = '500px';
             iframe.style.margin = 'auto';
             iframe.style.display = 'block';
+            iframe.style.border = '0';
             iframe.style.borderRadius = '15px';
+            iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); // Strict sandbox - No allow-forms, no allow-popups, no allow-top-navigation
 
-
-            // Add event listener to warn before refreshing or changing page
-            const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
-                // Standard message (browsers may show their own message instead)
-                const message = 'Are you sure you want to leave? Your payment process may be interrupted.';
-                event.preventDefault();
-                event.returnValue = message;
-                return message;
-            };
-
-            // Add the event listener when the iframe loads
-            iframe.addEventListener('load', () => {
-                // window.addEventListener('beforeunload', beforeUnloadHandler);
-            });
-
-            // Create a method to remove the warning when payment is complete
-            // This can be called via postMessage from the iframe when payment succeeds
-            window.removePaymentWarning = () => {
-                window.removeEventListener('beforeunload', beforeUnloadHandler);
-            };
+            iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
 
             // Get embed token
             const embedToken = this.container.getAttribute('data-embed-token');
             if (!embedToken) throw new Error('Missing embed token');
+            this.embedToken = embedToken;
+            this.ref = this.shortUUID();
+            console.log(`Posfra transaction ref: ${this.ref}`);
+
+            // Validate URL
+            const redirectURL = this.container.getAttribute('data-redirect-url');
+            if (redirectURL && this.validateUrl(redirectURL)) {
+                this.redirectURL = redirectURL;
+            }
 
             // AB: type this
             const data: any = {
-                et: embedToken,
+                et: this.embedToken,
+                r: this.ref,
             };
 
             // Options
@@ -58,25 +103,24 @@
                 'xmr',
                 'doge',
             ];
+            let i = 0;
             for (const option of options) {
                 const value = this.container.getAttribute(`data-${option}`);
-                if (value) data[option.toLowerCase()] = value;
+                if (value) {
+                    data[option.toLowerCase()] = value;
+                    i++;
+                }
             }
-
-            // Strict sandbox
-            iframe.setAttribute(
-                'sandbox',
-                'allow-scripts allow-same-origin' // No allow-forms, no allow-popups, no allow-top-navigation
-            );
-
-            iframe.style.border = '0';
-            iframe.style.display = 'block';
+            if (i === 0) throw new Error('Missing payment options');
 
             // Set URL
             const base64 = btoa(JSON.stringify(data));
-            iframe.setAttribute('src', `${API_URL}/${base64}`);
+            iframe.setAttribute('src', `${EMBED_URL}/${base64}`);
             this.container.innerHTML = ''; // prevent XSS from inner HTML
             this.container.appendChild(iframe);
+
+            // this.update();
+            setInterval(async () => await this.update(), 30 * 1000);
         }
     }
 

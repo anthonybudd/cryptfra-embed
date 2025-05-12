@@ -16,5 +16,6 @@ esbuild.build({
     logLevel: 'info',                     // Log build info to console
     define: {
         'API_URL': `'${process.env.API_URL}'`,
+        'EMBED_URL': `'${process.env.EMBED_URL}'`,
     }
 }).catch(() => process.exit(1));
