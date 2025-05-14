@@ -22,7 +22,11 @@
         }
 
         private getStatus(ref: string): Promise<Response> {
-            return fetch(`${API_URL}/ref/${ref}`);
+            return fetch(`${API_URL}/ref/${ref}`, {
+                headers: {
+                    'embed-token': this.embedToken as string,
+                },
+            });
         }
 
         private beforeUnloadHandler(event: BeforeUnloadEvent) {
