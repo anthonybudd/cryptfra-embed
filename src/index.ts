@@ -24,7 +24,7 @@
         private getStatus(ref: string): Promise<Response> {
             return fetch(`${API_URL}/ref/${ref}`, {
                 headers: {
-                    'embed-token': this.embedToken as string,
+                    'embedtoken': this.embedToken as string,
                 },
             });
         }
