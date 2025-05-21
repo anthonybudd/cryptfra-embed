@@ -10,8 +10,13 @@
 
         constructor(container: Element) {
             this.container = container;
-            if (!this.container.getAttribute('data-embed-token')) {
+
+            const ref = this.container.getAttribute('data-ref');
+            console.log('ref', ref);
+            if (!ref) {
                 this.build();
+            } else {
+                console.error('ERROR 73381: Alrady has a ref');
             }
         }
 
