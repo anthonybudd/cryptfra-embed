@@ -5,6 +5,7 @@
         private container: Element;
         private embedToken: string | null = null;
         private ref: string | null = null;
+        private cookieRef: string | null = null;
         private noWarning: boolean = false;
         private redirectURL: string | null = null;
 
@@ -15,6 +16,24 @@
             if (!ref) {
                 this.build();
             }
+        }
+
+        private setCookie(name: string, value: string, hours: number): void {
+            const date = new Date();
+            date.setTime(date.getTime() + (hours * 60 * 60 * 1000));
+            const expires = `expires=${date.toUTCString()}`;
+            document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Strict`;
+        }
+
+        private getCookie(name: string): string | null {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+            return null;
+        }
+
+        private deleteCookie(name: string): void {
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
         }
 
         private shortUUID(): string {
@@ -46,7 +65,16 @@
                 const response = await this.getStatus(this.ref);
                 if (response.ok) {
                     const data = await response.json();
+
+                    // Update cookieRef
+                    if (this.cookieRef !== null) {
+                        this.deleteCookie('posfra_ref');
+                        this.setCookie('posfra_ref', this.ref, 24);
+                        this.cookieRef = this.ref;
+                    }
+
                     if (data.isPaid === true) {
+                        this.deleteCookie('posfra_ref');
 
                         if (!this.noWarning) {
                             window.removeEventListener('beforeunload', this.beforeUnloadHandler);
@@ -94,10 +122,14 @@
             if (!embedToken) throw new Error('Missing embed token');
             this.embedToken = embedToken;
 
+            // cookieRef
+            this.cookieRef = this.getCookie('posfra_ref');
+
             // Ref
             this.ref = this.shortUUID();
             this.container.setAttribute('data-ref', this.ref);
             console.log(`Posfra transaction ref: ${this.ref}`);
+            if (!this.cookieRef) this.setCookie('posfra_ref', this.ref, 24);
 
             // Redirect URL
             const redirectURL = this.container.getAttribute('data-redirect-url');
@@ -111,14 +143,30 @@
                 iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
             }
 
-            // AB: type this
-            const data: any = {
+
+            type EmbedData = {
+                et: string;
+                r: string;
+                cr: string | null;
+                btc: string | null;
+                eth: string | null;
+                xmr: string | null;
+                doge: string | null;
+            };
+
+            const data: EmbedData = {
                 et: this.embedToken,
                 r: this.ref,
+                cr: this.cookieRef,
+                btc: null,
+                eth: null,
+                xmr: null,
+                doge: null,
             };
 
             // Options
-            const options = [
+            type PaymentOption = 'btc' | 'eth' | 'xmr' | 'doge';
+            const options: PaymentOption[] = [
                 'btc',
                 'eth',
                 'xmr',
@@ -128,7 +176,7 @@
             for (const option of options) {
                 const value = this.container.getAttribute(`data-${option}`);
                 if (value) {
-                    data[option.toLowerCase()] = value;
+                    data[option] = value;
                     i++;
                 }
             }
