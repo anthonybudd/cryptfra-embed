@@ -12,11 +12,8 @@
             this.container = container;
 
             const ref = this.container.getAttribute('data-ref');
-            console.log('ref', ref);
             if (!ref) {
                 this.build();
-            } else {
-                console.error('ERROR 73381: Alrady has a ref');
             }
         }
 
