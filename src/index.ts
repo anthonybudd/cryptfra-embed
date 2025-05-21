@@ -10,7 +10,9 @@
 
         constructor(container: Element) {
             this.container = container;
-            this.build();
+            if (!this.container.getAttribute('data-embed-token')) {
+                this.build();
+            }
         }
 
         private shortUUID(): string {
@@ -88,7 +90,10 @@
             const embedToken = this.container.getAttribute('data-embed-token');
             if (!embedToken) throw new Error('Missing embed token');
             this.embedToken = embedToken;
+
+            // Ref
             this.ref = this.shortUUID();
+            this.container.setAttribute('data-ref', this.ref);
             console.log(`Posfra transaction ref: ${this.ref}`);
 
             // Redirect URL
@@ -102,8 +107,6 @@
             if (!this.noWarning) {
                 iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
             }
-
-
 
             // AB: type this
             const data: any = {
