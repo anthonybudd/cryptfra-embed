@@ -168,13 +168,19 @@
             type PaymentOption = 'btc' | 'eth' | 'xmr' | 'doge';
             const options: PaymentOption[] = [
                 'btc',
-                'eth',
-                'xmr',
-                'doge',
+                // 'eth',
+                // 'xmr',
+                // 'doge',
             ];
             let i = 0;
             for (const option of options) {
                 const value = this.container.getAttribute(`data-${option}`);
+                if (value && !/^\d*\.?\d+$/.test(value) && value !== 'custom') {
+                    throw new Error(`Invalid ${option} amount: ${value}`);
+                }
+
+                // AB min of 0.0002
+
                 if (value) {
                     data[option] = value;
                     i++;
