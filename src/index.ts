@@ -138,34 +138,56 @@
             }
 
             // No Warning
-            this.noWarning = this.container.getAttribute('data-no-warning') === 'true';
+            this.noWarning = this.container.getAttribute('data-no-warning') !== null;
             if (!this.noWarning) {
                 iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
             }
 
+            // Allow Custom
+            const allowCustom = this.container.getAttribute('data-allow-custom') !== null;
+
+            // Allow Custom Meta
+            const allowCustomMeta = this.container.getAttribute('data-allow-message') !== null;
+
+            // Metadata
+            let meta = '';
+            const m = this.container.getAttribute('data-meta');
+            if (m !== null) {
+                if (m.length > 255) {
+                    console.warn(`data-meta truncated, value is longer than 255 chars`);
+                }
+                meta = m.substring(0, 255);
+            }
 
             type EmbedData = {
                 et: string;
                 r: string;
                 cr: string | null;
+                ac: boolean | null;
+                acm: boolean | null;
+                m: string;
                 btc: string | null;
-                eth: string | null;
-                xmr: string | null;
-                doge: string | null;
+                // eth: string | null;
+                // xmr: string | null;
+                // doge: string | null;
             };
 
             const data: EmbedData = {
                 et: this.embedToken,
                 r: this.ref,
                 cr: this.cookieRef,
+                ac: allowCustom,
+                acm: allowCustomMeta,
+                m: meta,
                 btc: null,
-                eth: null,
-                xmr: null,
-                doge: null,
+                // eth: null,
+                // xmr: null,
+                // doge: null,
             };
 
             // Options
-            type PaymentOption = 'btc' | 'eth' | 'xmr' | 'doge';
+            type PaymentOption = 'btc';
+            // type PaymentOption = 'btc' | 'eth' | 'xmr' | 'doge';
             const options: PaymentOption[] = [
                 'btc',
                 // 'eth',
@@ -175,11 +197,9 @@
             let i = 0;
             for (const option of options) {
                 const value = this.container.getAttribute(`data-${option}`);
-                if (value && !/^\d*\.?\d+$/.test(value) && value !== 'custom') {
+                if (value && !/^\d*\.?\d+$/.test(value)) {
                     throw new Error(`Invalid ${option} amount: ${value}`);
                 }
-
-                // AB min of 0.0002
 
                 if (value) {
                     data[option] = value;
