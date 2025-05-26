@@ -111,8 +111,7 @@
             iframe.style.height = '500px';
             iframe.style.margin = 'auto';
             iframe.style.display = 'block';
-            iframe.style.border = '1px solid #ccc';
-            iframe.style.backgroundColor = '#121212';
+            iframe.style.backgroundColor = 'rgb(18, 18, 18)';
             iframe.style.borderRadius = '15px';
             iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); // Strict sandbox - No allow-forms, no allow-popups, no allow-top-navigation
 
@@ -141,6 +140,8 @@
             this.noWarning = this.container.getAttribute('data-no-warning') !== null;
             if (!this.noWarning) {
                 iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
+            } else {
+                console.log('Posfra: No warnings');
             }
 
             // Allow Custom
