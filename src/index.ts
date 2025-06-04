@@ -108,7 +108,7 @@
             iframe.setAttribute('frameborder', '0');
             iframe.setAttribute('loading', 'lazy');
             iframe.style.width = '300px';
-            iframe.style.height = '500px';
+            iframe.style.height = '550px';
             iframe.style.margin = 'auto';
             iframe.style.display = 'block';
             iframe.style.backgroundColor = 'rgb(18, 18, 18)';
@@ -167,10 +167,8 @@
                 ac: boolean | null;
                 acm: boolean | null;
                 m: string;
+                u?: string;
                 btc: string | null;
-                // eth: string | null;
-                // xmr: string | null;
-                // doge: string | null;
             };
 
             const data: EmbedData = {
@@ -181,20 +179,15 @@
                 acm: allowCustomMeta,
                 m: meta,
                 btc: null,
-                // eth: null,
-                // xmr: null,
-                // doge: null,
             };
+
+            if (this.container.getAttribute('data-username')) {
+                data.u = this.container.getAttribute('data-username') as string;
+            }
 
             // Options
             type PaymentOption = 'btc';
-            // type PaymentOption = 'btc' | 'eth' | 'xmr' | 'doge';
-            const options: PaymentOption[] = [
-                'btc',
-                // 'eth',
-                // 'xmr',
-                // 'doge',
-            ];
+            const options: PaymentOption[] = ['btc'];
             let i = 0;
             for (const option of options) {
                 const value = this.container.getAttribute(`data-${option}`);
