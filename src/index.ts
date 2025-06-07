@@ -77,7 +77,7 @@
                         this.cookieRef = this.ref;
                     }
 
-                    if (data.isPaid === true) {
+                    if (data.isAccepted === true) {
                         this.deleteCookie('posfra_ref');
 
                         if (!this.noWarning) {
