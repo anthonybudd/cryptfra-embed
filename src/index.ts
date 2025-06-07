@@ -8,6 +8,7 @@
         private cookieRef: string | null = null;
         private noWarning: boolean = false;
         private redirectURL: string | null = null;
+        private username: string | null = null;
 
         constructor(container: Element) {
             this.container = container;
@@ -45,9 +46,12 @@
         }
 
         private getStatus(ref: string): Promise<Response> {
+            let embedToken = this.embedToken;
+            if (this.username) embedToken = `${embedToken}:${this.username}`;
+
             return fetch(`${API_URL}/ref/${ref}`, {
                 headers: {
-                    'embedtoken': this.embedToken as string,
+                    'embedtoken': embedToken as string,
                 },
             });
         }
@@ -160,6 +164,11 @@
                 meta = m.substring(0, 255);
             }
 
+            // Username
+            if (this.container.getAttribute('data-username')) {
+                this.username = this.container.getAttribute('data-username') as string;
+            }
+
             type EmbedData = {
                 et: string;
                 r: string;
@@ -181,8 +190,8 @@
                 btc: null,
             };
 
-            if (this.container.getAttribute('data-username')) {
-                data.u = this.container.getAttribute('data-username') as string;
+            if (this.username) {
+                data.u = this.username;
             }
 
             // Options
