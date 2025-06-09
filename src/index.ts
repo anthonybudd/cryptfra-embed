@@ -49,7 +49,7 @@
             let embedToken = this.embedToken;
             if (this.username) embedToken = `${embedToken}:${this.username}`;
 
-            return fetch(`${API_URL}/ref/${ref}`, {
+            return fetch(`${API_URL}/transactions/ref/${ref}`, {
                 headers: {
                     'embedtoken': embedToken as string,
                 },
