@@ -142,7 +142,7 @@
 
             // No Warning
             this.noWarning = this.container.getAttribute('data-no-warning') !== null;
-            if (!this.noWarning) {
+            if (this.noWarning) {
                 iframe.addEventListener('load', () => window.addEventListener('beforeunload', this.beforeUnloadHandler));
             } else {
                 console.log('Posfra: No warnings');
