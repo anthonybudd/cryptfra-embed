@@ -1,4 +1,4 @@
-# Client side Embed Code
+# Client-side Embed Code
 
 ```
 node_modules/.bin/nodemon -w src/index.ts --exec "node build.js"
