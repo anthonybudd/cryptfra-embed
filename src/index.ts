@@ -10,6 +10,7 @@
         private amount: string | null = null;
         private ref: string | null = null;
         private url: string | null = null;
+        private isAccepted: boolean = false;
 
         private debugMode: boolean = false;
         private noWarning: boolean = false;
@@ -103,12 +104,14 @@
             window.addEventListener('beforeunload', this.beforeUnloadHandler);
 
             this.update();
-            setInterval(async () => await this.update(), 30 * 1000);
+            setInterval(async () => await this.update(), 10 * 1000);
         }
 
         private exit() {
-            const confirmed = window.confirm('Are you sure you want to close the payment window?');
-            if (!confirmed) return;
+            if (!this.isAccepted) {
+                const confirmed = window.confirm('Are you sure you want to close the payment window?');
+                if (!confirmed) return;
+            }
             window.removeEventListener('beforeunload', this.beforeUnloadHandler);
             this.overlay?.remove();
             this.overlay = null;
@@ -123,11 +126,9 @@
         }
 
         private getStatus(ref: string): Promise<Response> {
-            let embedToken = this.embedToken;
-
-            return fetch(`${API_URL}/transactions/ref/${ref}`, {
+            return fetch(`${API_URL}/transaction/ref/${ref}`, {
                 headers: {
-                    'embedtoken': embedToken as string,
+                    'embedtoken': this.embedToken as string,
                 },
             });
         }
@@ -147,9 +148,8 @@
                     const data = await response.json();
 
                     if (data.isAccepted === true) {
-                        if (!this.noWarning) {
-                            window.removeEventListener('beforeunload', this.beforeUnloadHandler);
-                        }
+                        this.isAccepted = true;
+                        window.removeEventListener('beforeunload', this.beforeUnloadHandler);
 
                         if (this.redirectURL) {
                             window.location.href = this.redirectURL;
