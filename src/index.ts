@@ -8,12 +8,12 @@
 
         private embedToken: string | null = null;
         private amount: string | null = null;
+
         private ref: string | null = null;
         private url: string | null = null;
         private isAccepted: boolean = false;
 
         private debugMode: boolean = false;
-        private noWarning: boolean = false;
         private redirectURL: string | null = null;
 
         constructor(container: Element) {
@@ -52,15 +52,12 @@
                 this.redirectURL = redirectURL;
             }
 
-            // No Warning
-            this.noWarning = this.container.getAttribute('data-no-warning') !== null;
-
             // Metadata
             let meta = '';
             const m = this.container.getAttribute('data-meta');
             if (m !== null) {
-                if (m.length > 255 && this.debugMode) console.warn(`Posfra: data-meta truncated, value is longer than 255 chars`);
-                meta = m.substring(0, 255);
+                if (m.length > 500 && this.debugMode) console.warn(`Posfra: data-meta truncated, value is longer than 500 chars`);
+                meta = m.substring(0, 500);
             }
 
             type EmbedData = {
@@ -103,6 +100,8 @@
 
             window.addEventListener('beforeunload', this.beforeUnloadHandler);
 
+            this.container.dispatchEvent(new CustomEvent('onOpenPaymentWindow'));
+
             this.update();
             setInterval(async () => await this.update(), 10 * 1000);
         }
@@ -112,6 +111,7 @@
                 const confirmed = window.confirm('Are you sure you want to close the payment window?');
                 if (!confirmed) return;
             }
+            this.container.dispatchEvent(new CustomEvent('onClosePaymentWindow'));
             window.removeEventListener('beforeunload', this.beforeUnloadHandler);
             this.overlay?.remove();
             this.overlay = null;
@@ -145,13 +145,23 @@
                 if (!this.ref) return;
                 const response = await this.getStatus(this.ref);
                 if (response.ok) {
-                    const data = await response.json();
+                    const payout = await response.json();
 
-                    if (data.isAccepted === true) {
+                    this.container.dispatchEvent(new CustomEvent('onPayoutUpdated', {
+                        detail: payout
+                    }));
+
+                    if (payout.isAccepted === true) {
                         this.isAccepted = true;
                         window.removeEventListener('beforeunload', this.beforeUnloadHandler);
 
-                        if (this.redirectURL) {
+                        this.container.dispatchEvent(new CustomEvent('onPaymentAccepted', {
+                            detail: payout,
+                        }));
+
+                        if (payout.redirectURL) {
+                            window.location.href = payout.redirectURL;
+                        } else if (this.redirectURL) {
                             window.location.href = this.redirectURL;
                         }
                     }
