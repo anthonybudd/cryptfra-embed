@@ -15,12 +15,12 @@
 </head>
 
 <body>
-    <h2>Client Page</h2>
+    <h2>Posfra.js Client Page</h2>
 
     <!-- data-embed-token="f419128e528d75174399b3662a2e0caaed29b98a59cbc9d33601fa2f903c1b6f" -->
     <div
-        class="posfra"
-        data-embed-token="test-d4547907bfddabc01969b96642760911db47fcae79cb5ea4e5ec077b97b61838"
+        class="my-posfra"
+        data-embed-token="f419128e528d75174399b3662a2e0caaed29b98a59cbc9d33601fa2f903c1b6f"
         data-amount="0.002"
     ></div>
 
@@ -30,6 +30,32 @@
             ele.addEventListener('onClosePaymentWindow', (e) => console.log(e));
             ele.addEventListener('onPaymentAccepted', (e) => console.log(e));
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // console.log('DOMContentLoaded!!!');
+            // console.log(PosfraEmbed);
+
+            const element = document.querySelector('.my-posfra');
+            const embed = new PosfraEmbed(element);
+            embed.container.addEventListener('onOpenPaymentWindow', (event) => {
+                console.log(event);
+            });
+        });
+
+
+        // document.querySelector('.posfra')
+        //     .addEventListener('onPaymentAccepted', (event) => {
+
+        //         // Bitcoin transaction has been confirmed
+        //         // on the blockchain
+        //         const transaction = event.detail;
+        //         console.log({
+        //             ref: transaction.ref,
+        //             amount: transaction.amount,
+        //             txid: transaction.txid,
+        //             isAccepted: transaction.isAccepted,
+        //         });
+        //     })
     </script>
 
     <style class="posfra-css">
@@ -91,6 +117,21 @@
             z-index: 99999;
         }
 
+        .posfra-content-wrapper {
+            width: 300px;
+            height: 550px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            /* background-color: rgb(18, 18, 18); */
+            background-color: red;
+            border-radius: 15px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
         .posfra-iframe {
             width: 300px;
             height: 550px;
@@ -103,6 +144,27 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+        }
+
+        .posfra-close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background-color: rgb(18, 18, 18, 0.85);
+            border-radius: 20px;
+            cursor: pointer;
+            padding: 8px 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .posfra-close-button:hover {
+            background-color: rgb(18, 18, 18, 1);
+        }
+
+        .posfra-close-button svg {
+            width: 20px;
+            height: 20px;
+            transform: translateY(2px);
         }
     </style>
 
